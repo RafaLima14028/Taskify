@@ -2,7 +2,10 @@
 
 ## Libraries:
 
-...
+fastapi
+uvicorn
+psycopg2
+python-dotenv
 
 ## Running the project:
 
@@ -32,3 +35,7 @@ Observation! Maybe it is necessary change the port of uvicorn.
 - Auth:
 
 - Users:
+
+## About .env:
+
+...
