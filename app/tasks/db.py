@@ -28,7 +28,7 @@ class DBTasks:
 
         self._create_table()
 
-    def _create_table(self):
+    def _create_table(self) -> None:
         if not self._conn:
             raise Exception("Error: The tasks db is not open")
 
@@ -102,7 +102,7 @@ class DBTasks:
             if cursor:
                 cursor.close()
 
-    def close(self):
+    def close(self) -> None:
         if self._conn:
             self._conn.close()
 
@@ -113,7 +113,7 @@ class DBTasks:
         status: str = None,
         priority: str = None,
         due_date: str = None,
-    ):
+    ) -> None:
         priority = int(priority) if priority and priority.isdigit() else 1
 
         if due_date:
@@ -124,24 +124,9 @@ class DBTasks:
 
         cursor = self._conn.cursor()
 
-        columns = ["title"]
-        values = [title]
-
-        if content is not None:
-            columns.append("content")
-            values.append(content)
-
-        if status is not None:
-            columns.append("status")
-            values.append(status)
-
-        if priority is not None:
-            columns.append("priority")
-            values.append(priority)
-
-        if due_date is not None:
-            columns.append("due_date")
-            values.append(due_date)
+        columns, values = self._prepare_update_query_data(
+            title, content, status, priority, due_date
+        )
 
         try:
             cursor.execute(
@@ -159,7 +144,7 @@ class DBTasks:
             if cursor:
                 cursor.close()
 
-    def get_tasks(self):
+    def get_tasks(self) -> dict:
         if not self._conn:
             raise Exception("Error: The tasks db is not open")
 
@@ -202,5 +187,62 @@ class DBTasks:
         priority: str = None,
         due_date: str = None,
     ):
-        # TODO: COMPLETE IMPLEMENTATION HERE
-        ...
+        if not self._conn:
+            raise Exception("Error: The tasks db is not open")
+
+        cursor = self._conn.cursor()
+
+        priority = int(priority) if priority and priority.isdigit() else 1
+
+        if due_date:
+            due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
+
+        columns, values = self._prepare_update_query_data(
+            title, content, status, priority, due_date
+        )
+        values.append(task_id)
+
+        query = (
+            "UPDATE tasks SET "
+            + ", ".join(f"{col}=%s" for col in columns)
+            + f" WHERE id=%s;"
+        )
+
+        try:
+            cursor.execute(query, values)
+
+            self._conn.commit()
+        except Exception:
+            raise Exception("Error: Cannot update the tasks")
+        finally:
+            if cursor:
+                cursor.close()
+
+    @staticmethod
+    def _prepare_update_query_data(
+        title: str,
+        content: str = None,
+        status: str = None,
+        priority: int = None,
+        due_date: datetime = None,
+    ) -> tuple[list, tuple]:
+        columns = ["title"]
+        values = [title]
+
+        if content is not None:
+            columns.append("content")
+            values.append(content)
+
+        if status is not None:
+            columns.append("status")
+            values.append(status)
+
+        if priority is not None:
+            columns.append("priority")
+            values.append(priority)
+
+        if due_date is not None:
+            columns.append("due_date")
+            values.append(due_date)
+
+        return columns, values
