@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from starlette.status import HTTP_200_OK
 import uvicorn
 
 from app.tasks.routes import router as tasks_router
