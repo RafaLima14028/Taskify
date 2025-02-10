@@ -45,7 +45,9 @@ class DBTasks:
                             priority INTEGER DEFAULT 1,
                             due_date DATE,
                             created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            last_edition TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                            last_edition TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            id_user INTEGER NOT NULL,
+                            CONSTRAINT fk_users FOREIGN KEY (id_user) REFERENCES users (id) ON DELETE CASCADE
                         );
                     """
             )
@@ -96,8 +98,8 @@ class DBTasks:
                 )
 
             self._conn.commit()
-        except Exception:
-            raise Exception("Error: Cannot create table, function or trigger tasks")
+        except Exception as e:
+            raise Exception(f"Cannot create table, function or trigger tasks: {e}")
         finally:
             if cursor:
                 cursor.close()
@@ -108,6 +110,7 @@ class DBTasks:
 
     def create_task(
         self,
+        user_id: int,
         title: str,
         content: str = None,
         status: str = None,
@@ -128,6 +131,9 @@ class DBTasks:
             title, content, status, priority, due_date
         )
 
+        columns.append("id_user")
+        values.append(user_id)
+
         try:
             cursor.execute(
                 f"""
@@ -144,7 +150,7 @@ class DBTasks:
             if cursor:
                 cursor.close()
 
-    def get_tasks(self) -> dict:
+    def get_tasks(self, user_id: int) -> dict:
         if not self._conn:
             raise Exception("Error: The tasks db is not open")
 
@@ -154,8 +160,9 @@ class DBTasks:
         try:
             cursor.execute(
                 """
-                    SELECT * FROM tasks;
-                """
+                    SELECT * FROM tasks WHERE id_user = %s;
+                """,
+                (user_id,),
             )
 
             rows = cursor.fetchall()
@@ -180,6 +187,7 @@ class DBTasks:
 
     def update_tasks(
         self,
+        user_id: int,
         task_id: int,
         title: str,
         content: str = None,
@@ -201,11 +209,12 @@ class DBTasks:
             title, content, status, priority, due_date
         )
         values.append(task_id)
+        values.append(user_id)
 
         query = (
             "UPDATE tasks SET "
             + ", ".join(f"{col}=%s" for col in columns)
-            + f" WHERE id=%s;"
+            + f" WHERE id=%s AND id_user=%s;"
         )
 
         try:
@@ -225,7 +234,7 @@ class DBTasks:
         status: str = None,
         priority: int = None,
         due_date: datetime = None,
-    ) -> tuple[list, tuple]:
+    ) -> tuple[list, list]:
         columns = ["title"]
         values = [title]
 

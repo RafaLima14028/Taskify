@@ -14,6 +14,7 @@ An API for task management built with FastAPI. It includes operations for creati
 - [Uvicorn](https://www.uvicorn.org/)
 - [Psycopg2](https://www.psycopg.org/docs/)
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
+- [Bcrypt](https://pypi.org/project/bcrypt/)
 
 ## Running the project:
 
