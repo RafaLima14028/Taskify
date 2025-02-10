@@ -67,9 +67,14 @@ You may need to change the port for uvicorn if the default port is already in us
 ```bash
 ├───.venv
 ├───app
-│   └───tasks
+│   ├───tasks
+│   │   ├─ db.py
+│   │   ├─ routes.py
+│   │   └─ utils.py
+│   └───users
 │       ├─ db.py
-│       └─ routes.py
+│       ├─ routes.py
+│       └─ utils.py
 ├─── .env
 ├─── .gitignore
 ├─── main.py
