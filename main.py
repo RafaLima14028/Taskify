@@ -3,11 +3,13 @@ import uvicorn
 
 from app.users.routes import router as users_router
 from app.tasks.routes import router as tasks_router
+from app.auth.routes import router as auth_router
 
 app = FastAPI()
 
 app.include_router(users_router, prefix="/api", tags=["users"])
 app.include_router(tasks_router, prefix="/api", tags=["tasks"])
+app.include_router(auth_router, prefix="/api", tags=["auth"])
 
 
 @app.get("/")

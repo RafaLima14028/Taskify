@@ -22,7 +22,7 @@ class DBUsers:
                 port=5432,
             )
         except Exception:
-            raise Exception("Cannot open tasks db")
+            raise Exception("Cannot open users db")
             self._conn = None
 
         self._create_table()

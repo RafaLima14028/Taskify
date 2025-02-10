@@ -15,6 +15,7 @@ An API for task management built with FastAPI. It includes operations for creati
 - [Psycopg2](https://www.psycopg.org/docs/)
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
 - [Bcrypt](https://pypi.org/project/bcrypt/)
+- [PyJWT](https://github.com/jpadilla/pyjwt)
 
 ## Running the project:
 
@@ -94,6 +95,18 @@ You may need to change the port for uvicorn if the default port is already in us
 
 - Users:
 
-## About .env:
+## About database:
 
 ...
+
+## About .env:
+
+In the .env file there are some environment variables for the database.
+
+```bash
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="1234"
+POSTGRES_HOST="localhost"
+POSTGRES_PORT=5432
+POSTGRES_DBNAME="taskifyDB"
+```
