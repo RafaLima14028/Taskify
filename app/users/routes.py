@@ -1,7 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.users.db import DBUsers
-from app.users.utils import check_user_is_valid, hashed_password
+from app.users.utils import check_user_is_valid, hashed_password, validate_token
 
 router = APIRouter()
 
@@ -27,8 +27,11 @@ async def create_user(user: dict) -> dict:
         return {"Error": str(e)}
 
 
-@router.put("/users/{user_id}")
-async def update_user(user_id: int, user: dict) -> dict:
+@router.put("/users")
+async def update_user(user: dict, user_id=Depends(validate_token)) -> dict:
+    if isinstance(user_id, dict):
+        return user_id
+
     try:
         results = check_user_is_valid(user)
 
@@ -46,8 +49,11 @@ async def update_user(user_id: int, user: dict) -> dict:
         return {"Error": str(e)}
 
 
-@router.delete("/users/{user_id}")
-async def delete_user(user_id: int) -> dict:
+@router.delete("/users")
+async def delete_user(user_id=Depends(validate_token)) -> dict:
+    if isinstance(user_id, dict):
+        return user_id
+
     try:
         db.delete_user(user_id)
 
