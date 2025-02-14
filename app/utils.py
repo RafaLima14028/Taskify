@@ -1,12 +1,26 @@
 from fastapi import Header
 import jwt
+import bcrypt
+from dotenv import load_dotenv
+import os
 from typing import Optional
 from datetime import datetime
-import bcrypt
 
-__SECRET_KEY = "KEY"
-__ALGORITHM = "HS256"
-__ACCESS_TOKEN_EXPIRE_MINUTES = 30
+load_dotenv()
+
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+ALGORITHM = os.getenv("JWT_ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTE"))
+
+
+def check_username_and_password_is_valid(user: dict) -> dict | tuple:
+    username = user.get("username", None)
+    password = user.get("password", None)
+
+    if (username is None) or (password is None):
+        return {"Error": "username or password is null"}
+
+    return username, password
 
 
 def check_user_is_valid(user: dict) -> dict | tuple:
@@ -20,6 +34,20 @@ def check_user_is_valid(user: dict) -> dict | tuple:
     return username, email, password
 
 
+def check_task_is_valid(task: dict) -> dict | tuple:
+    title = task.get("title", None)
+
+    if not title:
+        return {"Error": f"The task has no title"}
+
+    content = task.get("content", None)
+    status = task.get("status", None)
+    priority = task.get("priority", None)
+    due_date = task.get("due_date", None)
+
+    return title, content, status, priority, due_date
+
+
 def hashed_password(password: str) -> bytes:
     password_bytes = password.encode("utf-8")
 
@@ -28,12 +56,6 @@ def hashed_password(password: str) -> bytes:
     password_hash = bcrypt.hashpw(password_bytes, salt)
 
     return password_hash
-
-
-def check_hashed_password(password: str, hashed_password: bytes) -> bool:
-    password_bytes = password.encode("utf-8")
-
-    return bcrypt.checkpw(password_bytes, hashed_password)
 
 
 def validate_token(authorization: Optional[str] = Header(None)) -> dict | int:
@@ -45,9 +67,9 @@ def validate_token(authorization: Optional[str] = Header(None)) -> dict | int:
 
         payload = jwt.decode(
             jwt=token,
-            key=__SECRET_KEY,
+            key=SECRET_KEY,
             algorithms=[
-                __ALGORITHM,
+                ALGORITHM,
             ],
         )
 

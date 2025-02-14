@@ -15,11 +15,11 @@ class DBUsers:
 
         try:
             self._conn = psycopg2.connect(
-                dbname="taskifyDB",
-                user="postgres",
-                host="localhost",
-                password="1234",
-                port=5432,
+                dbname=dbname,
+                user=user,
+                host=host,
+                password=password,
+                port=port,
             )
         except Exception:
             raise Exception("Cannot open users db")

@@ -2,7 +2,12 @@ from fastapi import APIRouter
 import jwt
 from datetime import datetime, timedelta
 
-from app.auth.utils import check_user_is_valid
+from app.utils import (
+    check_username_and_password_is_valid,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    SECRET_KEY,
+    ALGORITHM,
+)
 from app.auth.db import DBAuth
 
 router = APIRouter()
@@ -10,14 +15,9 @@ router = APIRouter()
 db = DBAuth()
 
 
-__SECRET_KEY = "KEY"
-__ALGORITHM = "HS256"
-__ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-
 @router.post("/auth")
 async def login(user: dict) -> dict:
-    results = check_user_is_valid(user)
+    results = check_username_and_password_is_valid(user)
 
     if isinstance(results, dict):
         return results
@@ -30,9 +30,9 @@ async def login(user: dict) -> dict:
             token_data = {
                 "sub": str(exists_id),
                 "exp": datetime.utcnow()
-                + timedelta(minutes=__ACCESS_TOKEN_EXPIRE_MINUTES),
+                + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
             }
-            token = jwt.encode(token_data, __SECRET_KEY, algorithm=__ALGORITHM)
+            token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
             return {"Access Token": token, "Token Type": "bearer"}
 

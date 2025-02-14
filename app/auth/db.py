@@ -1,8 +1,7 @@
 import psycopg2
 from dotenv import load_dotenv
 import os
-
-from app.auth.utils import check_hashed_password
+import bcrypt
 
 
 class DBAuth:
@@ -17,11 +16,11 @@ class DBAuth:
 
         try:
             self._conn = psycopg2.connect(
-                dbname="taskifyDB",
-                user="postgres",
-                host="localhost",
-                password="1234",
-                port=5432,
+                dbname=dbname,
+                user=user,
+                host=host,
+                password=password,
+                port=port,
             )
         except Exception:
             raise Exception("Cannot open auth db")
@@ -48,7 +47,7 @@ class DBAuth:
                 user_id, hashed_password = result
                 hashed_password = bytes(hashed_password)
 
-                if check_hashed_password(password, hashed_password):
+                if self._check_hashed_password(password, hashed_password):
                     return {"ID": user_id}
                 else:
                     return {"Error": "Incorrect password"}
@@ -59,3 +58,9 @@ class DBAuth:
         finally:
             if cursor:
                 cursor.close()
+
+    @staticmethod
+    def _check_hashed_password(password: str, hashed_password: bytes) -> bool:
+        password_bytes = password.encode("utf-8")
+
+        return bcrypt.checkpw(password_bytes, hashed_password)

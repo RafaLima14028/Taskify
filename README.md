@@ -68,14 +68,16 @@ You may need to change the port for uvicorn if the default port is already in us
 ```bash
 ├───.venv
 ├───app
+│   ├───auth
+│   │   ├─ db.py
+│   │   └─ routes.py
 │   ├───tasks
 │   │   ├─ db.py
-│   │   ├─ routes.py
-│   │   └─ utils.py
-│   └───users
-│       ├─ db.py
-│       ├─ routes.py
-│       └─ utils.py
+│   │   └─ routes.py
+│   ├───users
+│   │   ├─ db.py
+│   │   └─ routes.py
+│   └─ utils.py
 ├─── .env
 ├─── .gitignore
 ├─── main.py
@@ -97,16 +99,20 @@ You may need to change the port for uvicorn if the default port is already in us
 
 ## About database:
 
-...
+![Database model](img_readme/db-model.png)
 
 ## About .env:
 
-In the .env file there are some environment variables for the database.
+In the .env file there are some environment variables for the database and JWT (JSON Web Token).
 
 ```bash
-POSTGRES_USER="postgres"
-POSTGRES_PASSWORD="1234"
-POSTGRES_HOST="localhost"
-POSTGRES_PORT=5432
-POSTGRES_DBNAME="taskifyDB"
+POSTGRES_USER = "postgres"
+POSTGRES_PASSWORD = "1234"
+POSTGRES_HOST = "localhost"
+POSTGRES_PORT = 5432
+POSTGRES_DBNAME = "taskifyDB"
+
+JWT_SECRET_KEY = "Taskify"
+JWT_ALGORITHM = "HS256"
+JWT_ACCESS_TOKEN_EXPIRE_MINUTE = 30
 ```

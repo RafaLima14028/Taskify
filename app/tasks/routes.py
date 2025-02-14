@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.tasks.db import DBTasks
-from app.tasks.utils import check_task_is_valid, validate_token
+from app.utils import validate_token, check_task_is_valid
 
 router = APIRouter()
 

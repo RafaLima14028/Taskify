@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.users.db import DBUsers
-from app.users.utils import check_user_is_valid, hashed_password, validate_token
+from app.utils import check_user_is_valid, hashed_password, validate_token
 
 router = APIRouter()
 
