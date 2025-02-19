@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 import jwt
 from datetime import datetime, timedelta
 
 from app.utils import (
+    IncorrectPasswordError,
+    NotFoundUserError,
     check_username_and_password_is_valid,
     ACCESS_TOKEN_EXPIRE_MINUTES,
     SECRET_KEY,
@@ -16,26 +18,20 @@ db = DBAuth()
 
 
 @router.post("/auth")
-async def login(user: dict) -> dict:
-    results = check_username_and_password_is_valid(user)
-
-    if isinstance(results, dict):
-        return results
-
+async def login(user: tuple = Depends(check_username_and_password_is_valid)) -> dict:
     try:
-        user_exists = db.check_user(*results)
-        exists_id = user_exists.get("ID", None)
+        id_user = db.check_user(*user)
 
-        if exists_id is not None:
-            token_data = {
-                "sub": str(exists_id),
-                "exp": datetime.utcnow()
-                + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
-            }
-            token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+        token_data = {
+            "sub": str(id_user),
+            "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        }
+        token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
 
-            return {"Access Token": token, "Token Type": "bearer"}
-
-        return user_exists
+        return {"Access Token": token, "Token Type": "bearer"}
+    except IncorrectPasswordError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+    except NotFoundUserError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        return {"Error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))

@@ -23,14 +23,14 @@ class DBTasks:
                 port=port,
             )
         except Exception:
-            raise Exception("Error: Cannot open tasks db")
+            raise Exception("Cannot open tasks db")
             self._conn = None
 
         self._create_table()
 
     def _create_table(self) -> None:
         if not self._conn:
-            raise Exception("Error: The tasks db is not open")
+            raise Exception("The tasks db is not open")
 
         cursor = self._conn.cursor()
 
@@ -99,7 +99,7 @@ class DBTasks:
 
             self._conn.commit()
         except Exception as e:
-            raise Exception(f"Cannot create table, function or trigger tasks: {e}")
+            raise Exception(f"Cannot create table, function or trigger tasks")
         finally:
             if cursor:
                 cursor.close()
@@ -123,7 +123,7 @@ class DBTasks:
             due_date = datetime.strptime(due_date, "%Y-%m-%d").date()
 
         if not self._conn:
-            raise Exception("Error: The tasks db is not open")
+            raise Exception("The tasks db is not open")
 
         cursor = self._conn.cursor()
 
@@ -145,14 +145,14 @@ class DBTasks:
 
             self._conn.commit()
         except Exception:
-            raise Exception("Error: Cannot create the task")
+            raise Exception("Cannot create the task")
         finally:
             if cursor:
                 cursor.close()
 
     def get_tasks(self, user_id: int) -> dict:
         if not self._conn:
-            raise Exception("Error: The tasks db is not open")
+            raise Exception("The tasks db is not open")
 
         cursor = self._conn.cursor()
         tasks = dict()
@@ -178,7 +178,7 @@ class DBTasks:
                     "last_edition": i[7].strftime("%Y-%m-%d"),
                 }
         except Exception:
-            raise Exception("Error: Cannot get the tasks")
+            raise Exception("Cannot get the tasks")
         finally:
             if cursor:
                 cursor.close()
@@ -196,7 +196,7 @@ class DBTasks:
         due_date: str = None,
     ):
         if not self._conn:
-            raise Exception("Error: The tasks db is not open")
+            raise Exception("The tasks db is not open")
 
         cursor = self._conn.cursor()
 
@@ -222,7 +222,7 @@ class DBTasks:
 
             self._conn.commit()
         except Exception:
-            raise Exception("Error: Cannot update the tasks")
+            raise Exception("Cannot update the tasks")
         finally:
             if cursor:
                 cursor.close()

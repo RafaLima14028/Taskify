@@ -1,4 +1,4 @@
-from fastapi import Header
+from fastapi import Header, HTTPException
 import jwt
 import bcrypt
 from dotenv import load_dotenv
@@ -13,32 +13,49 @@ ALGORITHM = os.getenv("JWT_ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTE"))
 
 
-def check_username_and_password_is_valid(user: dict) -> dict | tuple:
+class IncorrectPasswordError(Exception):
+    def __init__(self):
+        super().__init__("Incorrect password")
+
+
+class NotFoundUserError(Exception):
+    def __init__(self):
+        super().__init__("User not exists in database")
+
+
+class UsernameOrEmailAlreadyBeenCreatedError(Exception):
+    def __init__(self):
+        super().__init__("This user or email has already been created")
+
+
+def check_username_and_password_is_valid(user: dict) -> tuple:
     username = user.get("username", None)
     password = user.get("password", None)
 
     if (username is None) or (password is None):
-        return {"Error": "username or password is null"}
+        raise HTTPException(status_code=400, detail="username or password is null")
 
     return username, password
 
 
-def check_user_is_valid(user: dict) -> dict | tuple:
+def check_user_is_valid(user: dict) -> tuple:
     username = user.get("username", None)
     email = user.get("email", None)
     password = user.get("password", None)
 
     if (username is None) or (email is None) or (password is None):
-        return {"Error": "username, email or password is null"}
+        raise HTTPException(
+            status_code=400, detail="username, email or password is null"
+        )
 
     return username, email, password
 
 
-def check_task_is_valid(task: dict) -> dict | tuple:
+def check_task_is_valid(task: dict) -> tuple:
     title = task.get("title", None)
 
     if not title:
-        return {"Error": f"The task has no title"}
+        raise HTTPException(status_code=400, detail="The task has no title")
 
     content = task.get("content", None)
     status = task.get("status", None)
@@ -58,9 +75,9 @@ def hashed_password(password: str) -> bytes:
     return password_hash
 
 
-def validate_token(authorization: Optional[str] = Header(None)) -> dict | int:
+def validate_token(authorization: Optional[str] = Header(None)) -> int:
     if not authorization:
-        return {"Error": "Token not provided"}
+        raise HTTPException(status_code=400, detail="Token not provided")
 
     try:
         token = authorization.split(" ")[1]
@@ -74,11 +91,10 @@ def validate_token(authorization: Optional[str] = Header(None)) -> dict | int:
         )
 
         if payload.get("exp") > datetime.utcnow().timestamp():
-            return {"Error": "Token expired"}
+            raise HTTPException(status_code=401, detail="Token expired")
 
-        return payload.get("sub")
+        return int(payload.get("sub"))
     except jwt.ExpiredSignatureError:
-        return {"Error": "Token expired"}
+        raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError as e:
-        print(e)
-        return {"Error": "Token invalid"}
+        raise HTTPException(status_code=401, detail="Token invalid")

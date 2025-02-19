@@ -2,6 +2,8 @@ import psycopg2
 from dotenv import load_dotenv
 import os
 
+from app.utils import UsernameOrEmailAlreadyBeenCreatedError
+
 
 class DBUsers:
     def __init__(self):
@@ -59,7 +61,7 @@ class DBUsers:
 
     def create_user(self, username: str, email: str, hashed_password: bytes) -> None:
         if not self._conn:
-            raise Exception("Error: Cannot open users db")
+            raise Exception("Cannot open users db")
 
         cursor = self._conn.cursor()
 
@@ -73,8 +75,10 @@ class DBUsers:
             )
 
             self._conn.commit()
+        except psycopg2.errors.UniqueViolation:
+            raise UsernameOrEmailAlreadyBeenCreatedError
         except Exception:
-            raise Exception("Error: Cannot create user")
+            raise Exception("Cannot create user")
         finally:
             if cursor:
                 cursor.close()
@@ -83,26 +87,26 @@ class DBUsers:
         self, user_id: int, username: str, email: str, hashed_password: bytes
     ) -> None:
         if not self._conn:
-            raise Exception("Error: Cannot open users db")
+            raise Exception("Cannot open users db")
 
         cursor = self._conn.cursor()
 
         try:
             cursor.execute(
-                "UPDATE users SET username = %s, email = %s, hashed_password = %s WHERE id = %s;",
-                (username, email, hashed_password, user_id),
+                "UPDATE users SET hashed_password = %s WHERE id = %s AND username = %s AND email = %s;",
+                (hashed_password, user_id, username, email),
             )
 
             self._conn.commit()
-        except Exception:
-            raise Exception("Error: Cannot update user")
+        except Exception as e:
+            raise Exception("Cannot update user")
         finally:
             if cursor:
                 cursor.close()
 
     def delete_user(self, user_id: int) -> None:
         if not self._conn:
-            raise Exception("Error: Cannot open users db")
+            raise Exception("Cannot open users db")
 
         cursor = self._conn.cursor()
 
@@ -114,7 +118,7 @@ class DBUsers:
 
             self._conn.commit()
         except Exception as e:
-            raise Exception("Error: Cannot delete user")
+            raise Exception("Cannot delete user")
         finally:
             if cursor:
                 cursor.close()

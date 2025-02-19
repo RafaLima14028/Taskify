@@ -3,6 +3,8 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 
+from app.utils import IncorrectPasswordError, NotFoundUserError
+
 
 class DBAuth:
     def __init__(self):
@@ -26,9 +28,9 @@ class DBAuth:
             raise Exception("Cannot open auth db")
             self._conn = None
 
-    def check_user(self, username: str, password: str) -> dict:
+    def check_user(self, username: str, password: str) -> int:
         if not self._conn:
-            raise Exception("Error: The auth db is not open")
+            raise Exception("The auth db is not open")
 
         cursor = self._conn.cursor()
 
@@ -48,11 +50,15 @@ class DBAuth:
                 hashed_password = bytes(hashed_password)
 
                 if self._check_hashed_password(password, hashed_password):
-                    return {"ID": user_id}
+                    return user_id
                 else:
-                    return {"Error": "Incorrect password"}
+                    raise IncorrectPasswordError
             else:
-                return {"Not Found": "User not exists in database"}
+                raise NotFoundUserError
+        except IncorrectPasswordError as e:
+            raise IncorrectPasswordError
+        except NotFoundUserError as e:
+            raise NotFoundUserError
         except Exception as e:
             raise Exception(f"Unable to query authentication db: {e}")
         finally:
