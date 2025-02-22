@@ -85,17 +85,102 @@ You may need to change the port for uvicorn if the default port is already in us
 └─── requirements.txt
 ```
 
-## Features:
-
-...
-
 ## Routes:
 
-- Tasks:
+### User management:
 
-- Auth:
+- **Create a user** (`POST /users`):  
+  Create a new user in the database.
+- **Update a user's password** (`PUT /users`):  
+  Updates the password of an existing user.
+- **Delete a user** (`DELETE /users`):  
+  Deletes a user from the database.
 
-- Users:
+### **Task Management**
+
+- **List all tasks** (`GET /tasks`):  
+  Retrieves all tasks associated with the authenticated user.
+- **Create a task** (`POST /tasks`):  
+  Creates a new task for the authenticated user.
+- **Update a task** (`PUT /tasks/{task_id}`):  
+  Updates the details of an existing task.
+
+### **Authentication**
+
+- **User authentication** (`POST /auth`):  
+  Authenticates a user and returns a JWT token.
+
+## Request Details:
+
+### Body Examples:
+
+Specify the JSON structure for each request's body.
+
+- **Create User (`/users`)**:
+
+  ```JSON
+  {
+     "username": "user1",
+     "email": "user1.test@exemple.com",
+     "password": "12345"
+  }
+  ```
+
+- **Update Password (`/users`)**:
+
+  ```JSON
+  {
+     "username": "user1",
+     "email": "user1.test@exemple.com",
+     "password": "54321"
+  }
+  ```
+
+- **Delete User (`/users`)**: No body.
+
+- **Create Task (`/tasks`)**:
+
+  ```JSON
+  {
+     "title": "Go to the supermarket",
+     "content": "Buy milk, bread, bananas and rice",
+     "status": "Complet",
+     "priority": 2,
+     "due_date": "2025-02-22"
+  }
+  ```
+
+- **Update Task (`/tasks/{task_id}`)**:
+
+  ```JSON
+  {
+     "title": "Go to the supermarket",
+     "status": "Pending",
+     "priority": 3,
+     "due_date": "2025-02-25"
+  }
+  ```
+
+- **User Authentication (`/auth`)**:
+
+  ```JSON
+  {
+     "username": "user1",
+     "password": "54321"
+  }
+  ```
+
+## Headers:
+
+Specify the required headers for the API routes.
+
+- **Authentication Header:**
+
+```Header
+Authorization: Bearer <JWT_TOKEN>
+```
+
+This header is required for routes that need user authentication, such as `PUT /users`, `DELETE /users`, `GET /tasks`, `POST /tasks` and `PUT /tasks/{task_id}`.
 
 ## About database:
 

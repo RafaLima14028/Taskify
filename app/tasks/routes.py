@@ -8,7 +8,7 @@ router = APIRouter()
 db = DBTasks()
 
 
-@router.get("/tasks/")
+@router.get("/tasks")
 async def get_tasks(user_id: int = Depends(validate_token)) -> dict:
     try:
         return db.get_tasks(user_id)
@@ -16,7 +16,7 @@ async def get_tasks(user_id: int = Depends(validate_token)) -> dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/tasks/")
+@router.post("/tasks")
 async def create_task(
     task: tuple = Depends(check_task_is_valid), user_id: int = Depends(validate_token)
 ) -> dict:
